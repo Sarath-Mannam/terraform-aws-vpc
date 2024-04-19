@@ -10,7 +10,7 @@ This module is going to create
 ### Inputs
 
 * cidr_block (Required) - User has to provide cidr block 
-* enable_dns_hostnames (Optional) - User can provide enable_dns_hostnames, *** by default it will be true ***
+* enable_dns_hostnames (Optional) - User can provide enable_dns_hostnames, ***by default it will be true***
 * enable_dns_support (Optional) - user can provide enable_dns_support, *** by default it will be true ***
 * common_tags (Optional) - User can provide common_tags for all resources, *** by default it will be empty ***
 * vpc_tags (Optional) - User can provide vpc_tags for vpc resources, *** by default it will be empty ***
