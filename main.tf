@@ -25,7 +25,7 @@ resource "aws_subnet" "public" {
   availability_zone = var.azs[count.index]
   tags = merge(
     var.common_tags,
-    {Name = var.public_subnet_names[count.index]}  # Creating a map
+    {Name = var.public_subnet_names[count.index]}  # Creating a map with {}
   )
 }
 
@@ -36,7 +36,7 @@ resource "aws_subnet" "private" {
   availability_zone = var.azs[count.index]
   tags = merge(
     var.common_tags,
-    {Name = var.private_subnet_names[count.index]}  # Creating a map
+    {Name = var.private_subnet_names[count.index]}  # Creating a map with {}
   )
 }
 
@@ -47,6 +47,64 @@ resource "aws_subnet" "database" {
   availability_zone = var.azs[count.index]
   tags = merge(
     var.common_tags,
-    {Name = var.database_subnet_names[count.index]}  # Creating a map
+    {Name = var.database_subnet_names[count.index]}  # Creating a map with {}
   )
 }
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    var.common_tags,
+    var.public_route_table_tags
+  )
+}
+
+resource "aws_route" "public" {
+  route_table_id            = aws_route_table.public.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.main.id
+  depends_on = [ aws_route_table.public ]  # Terraform will understand dependancy with creation of resources 
+}
+
+# Associate public route table with public subnets
+# public_route_table --> public-1a subnet
+# public_route_table --> public-1b subnet
+resource "aws_route_table_association" "public" {
+  count = length(var.public_subnet_cidr)
+  subnet_id      = element(aws_subnet.public[*].id, count.index)
+  route_table_id = aws_route_table.public.id
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    var.common_tags,
+    var.private_route_table_tags
+  )
+}
+
+resource "aws_route_table_association" "private" {
+  count = length(var.private_subnet_cidr)
+  subnet_id      = element(aws_subnet.private[*].id, count.index)
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table" "database" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    var.common_tags,
+    var.database_route_table_tags
+  )
+}
+
+resource "aws_route_table_association" "database" {
+  count = length(var.database_subnet_cidr)
+  subnet_id      = element(aws_subnet.database[*].id, count.index)
+  route_table_id = aws_route_table.database.id
+}
+
+
+
